@@ -1,0 +1,127 @@
+import { useState } from 'react';
+
+export default function App() {
+  // Ultra-minimal SVG - every byte counts for Solidity!
+  const minimalSvg = `<svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="250" fill="#faf8f0"/><path d="M80 50Q80 30 100 30Q120 30 120 50V65Q120 72 100 72Q80 72 80 65Z" fill="none" stroke="#000" stroke-width="2"/><path d="M87 65V82L100 87L113 82V65" fill="none" stroke="#000" stroke-width="2"/><circle cx="92" cy="72" r="2" fill="#000"/><circle cx="108" cy="72" r="2" fill="#000"/><line x1="100" y1="77" x2="100" y2="85" stroke="#000" stroke-width="1.5"/><rect x="92" y="87" width="16" height="10" fill="none" stroke="#000" stroke-width="2"/><rect x="80" y="97" width="40" height="70" fill="none" stroke="#000" stroke-width="2"/><rect x="90" y="107" width="20" height="25" fill="none" stroke="#000" stroke-width="1.5"/><rect x="80" y="152" width="40" height="6" fill="none" stroke="#000" stroke-width="2"/><circle cx="100" cy="155" r="2.5" fill="none" stroke="#000" stroke-width="1.5"/><path d="M80 97Q60 120 55 150Q52 175 57 210" fill="none" stroke="#000" stroke-width="2"/><path d="M120 97Q140 120 145 150Q148 175 143 210" fill="none" stroke="#000" stroke-width="2"/><path d="M120 105Q127 110 127 117Q127 122 117 125L100 127" fill="none" stroke="#000" stroke-width="2"/><path d="M80 105Q73 112 70 122" fill="none" stroke="#000" stroke-width="2"/><line x1="90" y1="167" x2="87" y2="215" stroke="#000" stroke-width="2"/><line x1="110" y1="167" x2="113" y2="215" stroke="#000" stroke-width="2"/><rect x="82" y="212" width="11" height="5" fill="none" stroke="#000" stroke-width="1.5"/><rect x="107" y="212" width="11" height="5" fill="none" stroke="#000" stroke-width="1.5"/></svg>`;
+
+  const base64 = btoa(minimalSvg);
+  const dataUri = `data:image/svg+xml;base64,${base64}`;
+
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-900 p-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div>
+          <h1 className="text-white mb-2">Minimal NFT SVG for Solidity</h1>
+          <p className="text-slate-400">Optimized for on-chain storage</p>
+        </div>
+
+        {/* Preview */}
+        <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+          <h2 className="text-white mb-4">Preview</h2>
+          <div className="bg-amber-50 rounded-lg p-8 flex justify-center">
+            <img src={dataUri} alt="Vader Bonaparte" className="w-64 h-auto" />
+          </div>
+        </div>
+
+        {/* Raw SVG */}
+        <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-white">Raw SVG ({minimalSvg.length} characters)</h2>
+            <button
+              onClick={() => handleCopy(minimalSvg)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+            >
+              {copied ? 'Copied!' : 'Copy SVG'}
+            </button>
+          </div>
+          <div className="bg-slate-950 rounded p-4 overflow-x-auto">
+            <code className="text-green-400 text-sm break-all">{minimalSvg}</code>
+          </div>
+        </div>
+
+        {/* Base64 */}
+        <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-white">Base64 ({base64.length} characters)</h2>
+            <button
+              onClick={() => handleCopy(base64)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+            >
+              {copied ? 'Copied!' : 'Copy Base64'}
+            </button>
+          </div>
+          <div className="bg-slate-950 rounded p-4 overflow-x-auto">
+            <code className="text-yellow-400 text-sm break-all">{base64}</code>
+          </div>
+        </div>
+
+        {/* Data URI */}
+        <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-white">Data URI ({dataUri.length} characters)</h2>
+            <button
+              onClick={() => handleCopy(dataUri)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+            >
+              {copied ? 'Copied!' : 'Copy Data URI'}
+            </button>
+          </div>
+          <div className="bg-slate-950 rounded p-4 overflow-x-auto">
+            <code className="text-purple-400 text-sm break-all">{dataUri}</code>
+          </div>
+        </div>
+
+        {/* Solidity Example */}
+        <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+          <h2 className="text-white mb-4">Solidity Usage Example</h2>
+          <div className="bg-slate-950 rounded p-4 overflow-x-auto">
+            <pre className="text-cyan-400 text-sm">
+{`string memory baseURI = "${dataUri}";
+
+// Or in your tokenURI function:
+function tokenURI(uint256 tokenId) 
+    public 
+    view 
+    override 
+    returns (string memory) 
+{
+    string memory svg = "${base64}";
+    string memory json = Base64.encode(
+        bytes(
+            string(
+                abi.encodePacked(
+                    '{"name":"Vader Bonaparte #',
+                    Strings.toString(tokenId),
+                    '","image":"data:image/svg+xml;base64,',
+                    svg,
+                    '"}'
+                )
+            )
+        )
+    );
+    return string(
+        abi.encodePacked("data:application/json;base64,", json)
+    );
+}`}
+            </pre>
+          </div>
+        </div>
+
+        <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4">
+          <p className="text-blue-300 text-sm">
+            💡 <strong>Gas optimization tips:</strong> This SVG is {minimalSvg.length} chars. For even smaller size, consider:
+            removing the background rect, using single letters for variables, or storing just the path data and reconstructing the SVG wrapper in your contract.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
