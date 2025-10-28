@@ -24,7 +24,7 @@ contract Cohort3NFT is ERC721, Ownable {
     error InvalidMaxSupply();
     error WithdrawFailed();
     error QuantityZero();
-    
+
     // State variables
     uint256 public immutable i_maxSupply;
     uint256 public totalMinted;
@@ -178,8 +178,7 @@ contract Cohort3NFT is ERC721, Ownable {
      * @notice Returns on-chain metadata (Base64 JSON) with hidden or revealed SVG
      */
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        if (!_exists(tokenId)) revert NonExistentToken();
-
+        if (ownerOf(tokenId) == address(0)) revert NonExistentToken();
         string memory image = revealed ? revealedSVG : hiddenSVG;
         string memory desc = revealed
             ? "Awarded to verified members of TechCrush Cohort 3."
