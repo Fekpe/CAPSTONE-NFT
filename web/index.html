@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TechCrush Cohort 3 — Mint</title>
+    <style>
+      :root{color-scheme:light}
+      body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 2rem; max-width: 900px; margin: 0 auto; }
+      header{display:flex;align-items:center;justify-content:space-between}
+      button { padding: .6rem 1rem; margin: .4rem 0; cursor:pointer }
+      .row { display:flex; gap:.5rem; align-items:center; }
+      input[type=number], input[type=text] { width:8rem; padding:.4rem }
+      .card{border:1px solid #eee;padding:1rem;border-radius:8px;margin:1rem 0}
+      pre { background:#f6f8fa; padding:1rem; border-radius:6px; overflow:auto }
+      .muted{color:#666;font-size:.95rem}
+      img.preview{max-width:100%;border:1px solid #ddd;margin-top:.5rem}
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>TechCrush Cohort 3 — Public Mint</h1>
+      <div>
+        <button id="connect">Connect Wallet</button>
+        <span id="account" class="muted"></span>
+      </div>
+    </header>
+
+    <p class="muted">Simple frontend to connect a wallet, read mint configs, mint tokens, and view metadata.</p>
+
+    <section class="card">
+      <h3>Contract</h3>
+      <p><strong>Address:</strong> <span id="contractAddress">(set in app.js)</span></p>
+      <p><strong>Network:</strong> <span id="network">-</span></p>
+      <p><strong>Mint price:</strong> <span id="mintPrice">-</span></p>
+      <p><strong>Max per wallet:</strong> <span id="maxPerWallet">-</span></p>
+      <p><strong>Total minted:</strong> <span id="totalMinted">-</span></p>
+      <p><strong>Revealed:</strong> <span id="revealed">-</span></p>
+    </section>
+
+    <section class="card">
+      <h3>Mint</h3>
+      <div class="row">
+        <label>Quantity <input id="quantity" type="number" min="1" value="1" /></label>
+        <button id="mintBtn">Mint</button>
+        <span id="mintResult" class="muted"></span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Your tokens</h3>
+      <div class="row"><button id="refreshTokens">Refresh</button></div>
+      <div id="tokens" style="margin-top:.5rem"></div>
+    </section>
+
+    <section class="card">
+      <h3>Token metadata (raw)</h3>
+      <div class="row">
+        <input id="tokenId" type="number" placeholder="token id" />
+        <button id="getTokenURI">Get tokenURI</button>
+      </div>
+      <pre id="tokenURIOutput"></pre>
+      <div id="metadataInfo"></div>
+      <img id="imagePreview" class="preview" alt="preview" style="display:none" />
+    </section>
+
+    <!-- Use UMD build so browsers can load via <script> -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

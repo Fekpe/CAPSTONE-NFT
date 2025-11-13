@@ -57,7 +57,13 @@ contract Cohort3NFT is ERC721, Ownable {
      * @param _mintPrice initial mint price (wei)
      * @param _maxPerWallet per-wallet cap
      */
-    constructor(string memory _name, string memory _symbol, uint256 _maxSupply, uint256 _mintPrice, uint256 _maxPerWallet) ERC721(_name, _symbol) {
+    /// @notice Create a new Cohort3NFT collection
+    /// @param _name Token collection name
+    /// @param _symbol Token collection symbol
+    /// @param _maxSupply Maximum number of tokens that can be minted
+    /// @param _mintPrice Initial mint price in wei
+    /// @param _maxPerWallet Maximum tokens a single wallet can mint via public mint
+    constructor(string memory _name, string memory _symbol, uint256 _maxSupply, uint256 _mintPrice, uint256 _maxPerWallet) ERC721(_name, _symbol) Ownable(msg.sender) {
         if (_maxSupply == 0) revert InvalidMaxSupply();
         i_maxSupply = _maxSupply;
         mintPrice = _mintPrice;
@@ -74,6 +80,10 @@ contract Cohort3NFT is ERC721, Ownable {
      * @notice Allows anyone to mint NFTs by paying the correct amount. 
      * @param quantity Number of NFTs to mint. 
      */
+    /// @notice Public mint function. Users must send the required ETH value.
+    /// @dev Enforces `maxPerWallet` and `i_maxSupply`. Refunds excess value to sender.
+    /// Uses simple enumeration bookkeeping in `_allTokens` and `_ownedTokens`.
+    /// @param quantity Number of tokens to mint
     function mint(uint256 quantity) external payable {
         if (quantity == 0) revert QuantityZero();
 
@@ -114,6 +124,9 @@ contract Cohort3NFT is ERC721, Ownable {
     /**
      * @notice Owner can mint tokens to an address without payment (reserve).
      */
+    /// @notice Owner-only mint to reserve tokens without payment
+    /// @param to Recipient address
+    /// @param quantity Number of tokens to mint
     function ownerMint(address to, uint256 quantity) external onlyOwner {
         if (to == address(0)) revert ZeroAddress();
 
@@ -137,34 +150,45 @@ contract Cohort3NFT is ERC721, Ownable {
     }
 
     // set mint price in wei
+    /// @notice Update the mint price (in wei)
+    /// @param newPrice New price in wei
     function setMintPrice(uint256 newPrice) external onlyOwner {
         mintPrice = newPrice;
     }
 
     // set new max per wallet
+    /// @notice Update the max per wallet for public minting
+    /// @param newLimit New per-wallet limit
     function setMaxPerWallet(uint256 newLimit) external onlyOwner {
         maxPerWallet = newLimit;
     }
 
     // set the hidden SVG (owner can update before/after reveal if needed)
+    /// @notice Update the hidden SVG data URI
+    /// @param svgDataURI A data:image/svg+xml;base64,... URI or other image data URI
     function setHiddenSVG(string calldata svgDataURI) external onlyOwner {
         hiddenSVG = svgDataURI;
         emit HiddenSVGUpdated(svgDataURI);
     }
 
     // set the revealed SVG (owner can update before reveal)
+    /// @notice Update the revealed SVG data URI
+    /// @param svgDataURI A data:image/svg+xml;base64,... URI or other image data URI
     function setRevealedSVG(string calldata svgDataURI) external onlyOwner {
         revealedSVG = svgDataURI;
         emit RevealedSVGUpdated(svgDataURI);
     }
 
     // onlyOwner to flip reveal to true
+    /// @notice Flip the reveal flag so tokenURI returns the revealed image
     function reveal() external onlyOwner {
         revealed = true;
         emit MetadataRevealed();
     }
 
     // Withdraws all ETH from the contract to the owner’s wallet. 
+    /// @notice Withdraw full contract ETH balance to the owner
+    /// @dev Uses a call and reverts on failure. Only callable by owner.
     function withdraw() external onlyOwner { 
         uint256 balance = address(this).balance; 
         if (balance == 0) revert NoFunds(); 
@@ -177,8 +201,12 @@ contract Cohort3NFT is ERC721, Ownable {
     /**
      * @notice Returns on-chain metadata (Base64 JSON) with hidden or revealed SVG
      */
+    /// @notice Returns base64-encoded JSON metadata for a given tokenId
+    /// @param tokenId Token identifier
+    /// @return A data:application/json;base64,... metadata URI
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        if (ownerOf(tokenId) == address(0)) revert NonExistentToken();
+    // Use internal owner lookup to check existence so we can surface our custom error
+    if (_ownerOf(tokenId) == address(0)) revert NonExistentToken();
         string memory image = revealed ? revealedSVG : hiddenSVG;
         string memory desc = revealed
             ? "Awarded to verified members of TechCrush Cohort 3."
